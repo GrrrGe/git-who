@@ -69,8 +69,8 @@ export function renderTable(host: HTMLElement, data: TableResp, rerender: () => 
   host.innerHTML = `
     ${spotlight}
     <div class="toolbar">
-      <div class="field suggest-wrap">Filter authors
-        <input id="tf" class="input" type="search"
+      <div class="field suggest-wrap grow">Filter authors
+        <input id="tf" class="input search-lg" type="search"
           value="${esc(state.tableFilter)}" placeholder="name or email"
           role="combobox" aria-expanded="false" aria-controls="suggest"
           aria-label="Filter authors" autocomplete="off" />
@@ -101,11 +101,22 @@ export function renderTable(host: HTMLElement, data: TableResp, rerender: () => 
 
   const matches = (): TableAuthor[] => {
     const f = state.tableFilter.toLowerCase().trim();
-    const pool = !f
-      ? data.authors
-      : data.authors.filter((a) =>
-        a.name.toLowerCase().includes(f) || a.email.toLowerCase().includes(f));
-    return pool.slice(0, 8);
+    if (!f) return data.authors.slice(0, 8);
+    // Prefix matches first: name starting with the query outranks email
+    // starts-with, which outranks a substring anywhere. Stable sort keeps
+    // the ranked order inside each tier.
+    return data.authors
+      .filter((a) =>
+        a.name.toLowerCase().includes(f) || a.email.toLowerCase().includes(f))
+      .sort((a, b) => tier(a) - tier(b))
+      .slice(0, 8);
+  };
+
+  const tier = (a: TableAuthor): number => {
+    const f = state.tableFilter.toLowerCase().trim();
+    if (a.name.toLowerCase().startsWith(f)) return 0;
+    if (a.email.toLowerCase().startsWith(f)) return 1;
+    return 2;
   };
 
   const highlight = (name: string): string => {
