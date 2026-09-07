@@ -1,9 +1,9 @@
-/* GitWho design system — dark-canvas builder theme.
+/* GitWho design system: dark-canvas builder theme.
  * Tokens: 01 Color · 02 Type · 03 Buttons · 04 Spotlight · 05 Cards ·
  * 06 Forms · 07 Spacing · 08 Radius · 09 Elevation · 10 Responsive. */
 
 :root {
-  /* 01 — Color */
+  /* 01: Color */
   --white: #ffffff;
   --blue: #0099ff;
   --canvas: #090909;
@@ -32,7 +32,7 @@
   --bar-fg: var(--blue);
   --bar-rest: #3a4350;
 
-  /* 07 — Spacing */
+  /* 07: Spacing */
   --hair: 1px;
   --xxs: 4px;
   --xs: 8px;
@@ -43,7 +43,7 @@
   --xxl: 40px;
   --section: 96px;
 
-  /* 08 — Radius */
+  /* 08: Radius */
   --r-xs: 4px;
   --r-sm: 6px;
   --r-md: 10px;
@@ -98,7 +98,7 @@
   }
 }
 
-/* 02 — Typography */
+/* 02: Typography */
 .display-xxl { font: 500 110px/0.85 var(--font-display); letter-spacing: -5.5px; }
 .display-xl { font: 500 85px/0.95 var(--font-display); letter-spacing: -4.25px; }
 .display-lg { font: 500 62px/1 var(--font-display); letter-spacing: -3.1px; }
@@ -130,7 +130,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
   outline-offset: 2px;
 }
 
-/* 03 — Buttons */
+/* 03: Buttons */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--xs);
   border-radius: var(--r-pill);
@@ -169,7 +169,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 }
 .tab[aria-pressed="true"] { background: var(--surface-2); color: var(--ink); }
 
-/* 04 — Gradient spotlight cards */
+/* 04: Gradient spotlight cards */
 .spotlight {
   border-radius: var(--r-xl);
   padding: var(--xl);
@@ -184,7 +184,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .spotlight p { margin: 0 0 var(--lg); opacity: 0.85; }
 .spotlight .btn { background: rgba(255,255,255,0.16); color: #fff; border-color: rgba(255,255,255,0.25); }
 
-/* 05 — Cards */
+/* 05: Cards */
 .card {
   background: var(--card);
   border: 1px solid var(--border-soft);
@@ -199,7 +199,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .dot { display: inline-block; width: 10px; height: 10px; border-radius: var(--r-full); margin-right: 6px; }
 .faq-row { border-top: 1px solid var(--border-soft); padding: var(--md) 0; }
 
-/* 06 — Forms */
+/* 06: Forms */
 .field { display: flex; flex-direction: column; gap: var(--xxs); font-size: 13px; color: var(--muted); }
 .input, .textarea, select.input {
   font: inherit; color: var(--fg);
@@ -309,7 +309,7 @@ dialog.date-dialog .presets { display: flex; gap: var(--xs); flex-wrap: wrap; }
   min-height: 40px; padding: var(--xs) var(--sm);
 }
 
-/* Brand wordmark: GitWho? — "Git" blue, "Who" ink, "?" glowing outline link */
+/* Brand wordmark: GitWho?: "Git" blue, "Who" ink, "?" glowing outline link */
 .brand-title a { text-decoration: none; }
 .t-git { color: var(--blue); }
 .t-who { color: var(--ink); }
@@ -372,12 +372,12 @@ table.data th button { border: none; background: none; padding: 0; font-weight: 
 .hist-bar .win { background: var(--bar-fg); }
 .hist-bar .rest { background: var(--bar-rest); }
 
-/* 09 — Elevation */
+/* 09: Elevation */
 .level-1 { background: var(--surface-1); }
 .level-2 { border: 1px solid var(--hairline); box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); }
 .level-3 { box-shadow: 0 0 0 2px var(--blue); }
 
-/* 10 — Responsive */
+/* 10: Responsive */
 @media (max-width: 1199px) { .display-xxl { font-size: 85px; letter-spacing: -4.25px; } }
 @media (max-width: 810px) {
   .grid-3, .grid-2 { grid-template-columns: 1fr 1fr; }

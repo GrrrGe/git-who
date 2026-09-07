@@ -64,7 +64,7 @@ export function renderTree(host: HTMLElement, data: TreeResp, rerender: () => vo
     <div class="toolbar">
       <nav class="body" aria-label="Breadcrumb">${crumbs.join(' ')}</nav>
       <span class="spacer"></span>
-      <span class="legend">Top contributor per node, color-coded by author.</span>
+      <span class="legend">Top contributor per node.</span>
     </div>
     <div class="card" style="padding:0;overflow:auto">
     <table class="data" aria-label="Files by top contributor">

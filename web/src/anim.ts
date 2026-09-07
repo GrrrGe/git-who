@@ -1,6 +1,6 @@
 // Scroll + headline animation helpers.
 // AOS (CDN, see index.html) handles fade-in-up; the nav shrink and the
-// typewriter are pure CSS/vanilla JS — no extra libraries.
+// typewriter are pure CSS/vanilla JS. No extra libraries.
 
 declare global {
   interface Window { AOS?: { init: (opts?: object) => void; refresh: () => void }; }

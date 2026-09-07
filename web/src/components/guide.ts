@@ -9,13 +9,13 @@ export function guideHTML(): string {
     <button id="guide-back" class="btn btn-secondary">← Back</button>
     <p class="caption" style="color:var(--muted);margin:32px 0 8px">Guide</p>
     <h1 class="display-lg">What can GitWho do?</h1>
-    <p class="body-lg" style="color:var(--muted)">Three views over your full git history — plus the CLI they all run on.</p>
+    <p class="body-lg" style="color:var(--muted)">Three views over your git history, plus the CLI behind them.</p>
 
     <section data-aos="fade-up">
       <div class="spotlight">
         <p class="caption">Table</p>
         <h3>Every author, ranked</h3>
-        <p class="body">Commits, files and lines (+/-) per author — sortable, filterable, mirrored from <code>git who table -l -f -m -c</code>.</p>
+        <p class="body">Commits, files, lines (+/-) per author. Sortable and filterable.</p>
       </div>
     </section>
 
@@ -23,28 +23,28 @@ export function guideHTML(): string {
       <div class="spotlight spotlight-orange">
         <p class="caption">Tree &amp; History</p>
         <h3>Own every directory</h3>
-        <p class="body">Top contributor per node, color-coded — plus a bar-chart timeline of winning authors per period.</p>
+        <p class="body">Top contributor per node, color-coded. Bar-chart timeline included.</p>
       </div>
     </section>
 
     <section class="grid grid-3" data-aos="fade-up">
       <div class="card">
         <p class="headline">Table</p>
-        <p class="body-sm" style="color:var(--muted)">Sortable authorship ledger. Find your bus factor, top reviewers, and who to ask about any subsystem.</p>
+        <p class="body-sm" style="color:var(--muted)">Sortable ledger of every author.</p>
       </div>
       <div class="card">
         <p class="headline">Tree</p>
-        <p class="body-sm" style="color:var(--muted)">Collapsible file artboard. See who owns each directory at a glance, color-coded by author.</p>
+        <p class="body-sm" style="color:var(--muted)">File browser. Top contributor per node.</p>
       </div>
       <div class="card">
         <p class="headline">History</p>
-        <p class="body-sm" style="color:var(--muted)">Activity atmosphere chart. Winning author per period, period totals, mode-aware bars.</p>
+        <p class="body-sm" style="color:var(--muted)">Bar chart. Winner and totals per period.</p>
       </div>
     </section>
 
     <section data-aos="fade-up">
       <h2 class="display-md">Prefer the terminal?</h2>
-      <p class="body" style="color:var(--muted)">The web UI runs the exact same analysis. Everything below works without a browser:</p>
+      <p class="body" style="color:var(--muted)">Same analysis, no browser:</p>
       <pre class="code"><span class="c"># Install the CLI (Go, or from source)</span>
 go install github.com/GrrrGe/git-who@latest
 git clone https://github.com/GrrrGe/git-who.git && cd git-who && make build

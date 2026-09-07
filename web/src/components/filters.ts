@@ -104,7 +104,7 @@ export function bindFilters(root: HTMLElement, onChange: () => void) {
     if (!el) return;
     el.textContent = selStart || selEnd
       ? `${selStart || '…'} → ${selEnd || '…'}`
-      : 'All time — click a day to set the start, click again for the end.';
+      : 'All time. Click a day for start, again for end.';
   };
 
   const renderCal = () => {

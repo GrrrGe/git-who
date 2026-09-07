@@ -40,7 +40,7 @@ export function authorColor(name: string): string {
 }
 
 export function fmtDate(s: string): string {
-  if (!s || s.startsWith('0001-')) return '—';
+  if (!s || s.startsWith('0001-')) return '-';
   const d = new Date(s);
   return isNaN(d.getTime()) ? s : d.toLocaleDateString();
 }
