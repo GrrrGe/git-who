@@ -271,15 +271,20 @@ func flattenTree(
 func PrintHist(out io.Writer, buckets []*stats.Bucket, m stats.Mode) {
 	const width = 36
 	peak := width
+	labelW := 0
 	for _, b := range buckets {
 		if v := b.TotalValue(m); v > peak {
 			peak = v
 		}
+		if n := len([]rune(b.Label)); n > labelW {
+			labelW = n
+		}
 	}
 	for _, b := range buckets {
 		v, total := b.WinnerValue(m), b.TotalValue(m)
+		label := b.Label + strings.Repeat(" ", labelW-len([]rune(b.Label)))
 		if total == 0 {
-			fmt.Fprintf(out, "%s ┤ \n", b.Label)
+			fmt.Fprintf(out, "%s ┤ \n", label)
 			continue
 		}
 		win := v * width / peak

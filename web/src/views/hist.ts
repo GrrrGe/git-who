@@ -2,9 +2,11 @@ import type { HistResp } from '../api';
 import { authorColor, esc } from '../state';
 
 export function renderHist(host: HTMLElement, data: HistResp) {
-  const max = Math.max(1, ...data.buckets.map((b) => b.total));
+  // Newest period first; scroll down for the earliest.
+  const buckets = [...data.buckets].reverse();
+  const max = Math.max(1, ...buckets.map((b) => b.total));
   const leader = data.buckets.reduce((acc, b) => (b.value > (acc?.value ?? -1) ? b : acc), data.buckets[0]);
-  const rows = data.buckets.map((b) => {
+  const rows = buckets.map((b) => {
     const winPct = (b.value / max) * 100;
     const restPct = ((b.total - b.value) / max) * 100;
     const label = `${b.period}: ${b.author.name || '(no commits)'} ${b.value}/${b.total}`;
