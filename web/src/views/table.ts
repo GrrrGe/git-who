@@ -7,7 +7,7 @@ function metricOf(a: TableAuthor, mode: Mode): number {
   return a.commits;
 }
 
-export function renderTable(host: HTMLElement, data: TableResp, rerender: () => void) {
+function visibleRows(data: TableResp): TableAuthor[] {
   const rows = data.authors.filter((a) => {
     const f = state.tableFilter.toLowerCase();
     return !f || a.name.toLowerCase().includes(f) || a.email.toLowerCase().includes(f);
@@ -25,6 +25,24 @@ export function renderTable(host: HTMLElement, data: TableResp, rerender: () => 
     else d = metricOf(x, state.mode) - metricOf(y, state.mode);
     return d * state.tableSortDir;
   });
+  return rows;
+}
+
+function rowsHTML(rows: TableAuthor[]): string {
+  if (!rows.length) return '<tr><td colspan="6">No authors.</td></tr>';
+  return rows.map((a) => `
+    <tr>
+      <td><span class="dot" style="background:${authorColor(a.name)}" aria-hidden="true"></span>${esc(a.name)}<br/><small style="color:var(--muted)">${esc(a.email)}</small></td>
+      <td>${a.commits.toLocaleString()}</td>
+      <td>${a.files.toLocaleString()}</td>
+      <td><span class="check">+${a.lines_added.toLocaleString()}</span> / <span style="color:var(--danger)">-${a.lines_removed.toLocaleString()}</span></td>
+      <td>${fmtDate(a.last_edit)}</td>
+      <td>${fmtDate(a.first_edit)}</td>
+    </tr>`).join('');
+}
+
+export function renderTable(host: HTMLElement, data: TableResp, rerender: () => void) {
+  const rows = visibleRows(data);
 
   const top = rows.slice(0, 3);
   const spotlight = top.length
@@ -48,25 +66,24 @@ export function renderTable(host: HTMLElement, data: TableResp, rerender: () => 
     return `<th><button data-sort="${k}" aria-label="Sort by ${label}">${label}${arrow}</button></th>`;
   }).join('');
 
-  const tr = rows.map((a) => `
-    <tr>
-      <td><span class="dot" style="background:${authorColor(a.name)}" aria-hidden="true"></span>${esc(a.name)}<br/><small style="color:var(--muted)">${esc(a.email)}</small></td>
-      <td>${a.commits.toLocaleString()}</td>
-      <td>${a.files.toLocaleString()}</td>
-      <td><span class="check">+${a.lines_added.toLocaleString()}</span> / <span style="color:var(--danger)">-${a.lines_removed.toLocaleString()}</span></td>
-      <td>${fmtDate(a.last_edit)}</td>
-      <td>${fmtDate(a.first_edit)}</td>
-    </tr>`).join('');
+  const options = data.authors
+    .map((a) => `<option value="${esc(a.name)}">${esc(a.email)}</option>`)
+    .join('');
 
   host.innerHTML = `
     ${spotlight}
     <div class="toolbar">
-      <label class="field">Filter authors <input id="tf" class="input" type="search" value="${esc(state.tableFilter)}" placeholder="name or email" /></label>
+      <label class="field">Filter authors
+        <input id="tf" class="input" type="search" list="author-suggest"
+          value="${esc(state.tableFilter)}" placeholder="name or email"
+          aria-label="Filter authors" autocomplete="off" />
+      </label>
+      <datalist id="author-suggest">${options}</datalist>
     </div>
     <div class="card" style="padding:0;overflow:auto">
     <table class="data" aria-label="Contributions by author">
       <thead><tr>${th}</tr></thead>
-      <tbody>${tr || '<tr><td colspan="6">No authors.</td></tr>'}</tbody>
+      <tbody id="author-rows">${rowsHTML(rows)}</tbody>
     </table></div>`;
 
   host.querySelectorAll<HTMLButtonElement>('button[data-sort]').forEach((b) => {
@@ -77,9 +94,13 @@ export function renderTable(host: HTMLElement, data: TableResp, rerender: () => 
       rerender();
     };
   });
+
+  // Filter in place: only the rows update, so the input keeps focus while
+  // typing and the browser can offer datalist suggestions.
   const tf = host.querySelector<HTMLInputElement>('#tf');
+  const tbody = host.querySelector('#author-rows');
   tf?.addEventListener('input', () => {
     state.tableFilter = tf.value;
-    renderTable(host, data, rerender);
+    if (tbody) tbody.innerHTML = rowsHTML(visibleRows(data));
   });
 }
