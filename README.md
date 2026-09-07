@@ -29,9 +29,27 @@ From source (Go only, zero dependencies):
 ```bash
 git clone https://github.com/GrrrGe/git-who.git
 cd git-who
-make build
-./git-who --version
+make install
 ```
+
+### Put it on PATH
+
+Both methods place the binary where Go keeps executables (`go env GOPATH`/bin,
+usually `~/go/bin`). If your shell cannot find `git-who`, add that directory
+to PATH once (in `~/.zshrc` or `~/.bashrc`):
+
+```bash
+export PATH="$PATH:$(go env GOPATH)/bin"
+```
+
+Verify from any repo:
+
+```bash
+git-who --version
+```
+
+The binary is named `git-who`, so plain `git who` works too once it is on
+PATH.
 
 Web UI:
 

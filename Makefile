@@ -3,11 +3,15 @@ COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 LDFLAGS := -s -w -X main.version=$(VERSION) -X main.commit=$(COMMIT)
 
 BIN := git-who
+PREFIX ?= $(shell go env GOPATH)/bin
 
-.PHONY: build test vet clean
+.PHONY: build install test vet clean
 
 build:
 	go build -ldflags '$(LDFLAGS)' -o $(BIN) .
+
+install: build
+	cp $(BIN) $(PREFIX)/$(BIN)
 
 test:
 	go test ./...
