@@ -89,6 +89,18 @@ Timeline (`-l` ranks periods by lines):
 
 ![git-who hist](screenshots/hist.svg)
 
+## Web UI screenshots
+
+Same repo in the browser (`web/shot.mjs` captures these):
+
+![landing](screenshots/web-landing.png)
+
+![table view](screenshots/web-table.png)
+
+![tree view](screenshots/web-tree.png)
+
+![history view](screenshots/web-hist.png)
+
 ## Web UI
 
 `git-who serve` flags: `--port`, `--repo`. The UI is a single-page app

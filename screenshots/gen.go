@@ -1,7 +1,7 @@
 //go:build ignore
 
-// Generates screenshots/*.svg from real CLI output on a fictional demo repo.
-// Run: go run screenshots/gen.go   (builds ./git-who first via make)
+// Renders screenshots/*.svg from real CLI output against any repo.
+// Run: go run screenshots/gen.go /path/to/repo   (build ./git-who first)
 package main
 
 import (
@@ -11,95 +11,6 @@ import (
 	"path/filepath"
 	"strings"
 )
-
-type seedCommit struct {
-	who   string
-	email string
-	date  string
-	files map[string]string // path -> full content
-}
-
-func seed() []seedCommit {
-	return []seedCommit{
-		{"Alice", "alice@example.com", "2025-11-05T10:00:00",
-			map[string]string{
-				"README.md":   "# demo\n",
-				"main.go":     "package main\n\nfunc main() {}\n",
-				"pkg/parse.go": "package pkg\n\nfunc Parse(s string) string {\n\treturn s\n}\n",
-			}},
-		{"Bob", "bob@example.com", "2025-12-10T10:00:00",
-			map[string]string{
-				"pkg/emit.go": "package pkg\n\nfunc Emit(s string) string {\n\treturn s\n}\n",
-			}},
-		{"Carol", "carol@example.com", "2026-01-15T10:00:00",
-			map[string]string{
-				"main.go": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"demo\")\n\tfmt.Println(\"v2\")\n\tfmt.Println(\"v3\")\n\tfmt.Println(\"v4\")\n\tfmt.Println(\"v5\")\n}\n",
-				"pkg/parse_test.go": "package pkg\n\nimport \"testing\"\n\nfunc TestParse(t *testing.T) {}\n",
-			}},
-		{"Alice", "alice@example.com", "2026-02-20T10:00:00",
-			map[string]string{
-				"docs/guide.md": "# guide\n",
-				"pkg/parse.go":  "package pkg\n\nfunc Parse(s string) string {\n\treturn s + s\n}\n\nfunc ParseAll(in []string) []string {\n\tout := make([]string, len(in))\n\tfor i, s := range in {\n\t\tout[i] = Parse(s)\n\t}\n\treturn out\n}\n",
-			}},
-		{"Bob", "bob@example.com", "2026-03-25T10:00:00",
-			map[string]string{
-				"docs/api.md": "# api\n",
-				"main.go": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"demo\")\n\tfmt.Println(\"v2\")\n\tfmt.Println(\"v3\")\n\tfmt.Println(\"v4\")\n\tfmt.Println(\"v5\")\n\tfmt.Println(\"v6\")\n}\n",
-			}},
-		{"Carol", "carol@example.com", "2026-04-30T10:00:00",
-			map[string]string{
-				"pkg/emit.go": "package pkg\n\nimport \"strings\"\n\nfunc Emit(s string) string {\n\treturn strings.ToUpper(s)\n}\n\nfunc EmitAll(in []string) []string {\n\tout := make([]string, len(in))\n\tfor i, s := range in {\n\t\tout[i] = Emit(s)\n\t}\n\treturn out\n}\n",
-			}},
-		{"Alice", "alice@example.com", "2026-06-12T10:00:00",
-			map[string]string{
-				"docs/guide.md": "# guide\n\n## install\n\n## usage\n\n## faq\n",
-			}},
-		{"Bob", "bob@example.com", "2026-08-03T10:00:00",
-			map[string]string{
-				"pkg/emit.go": "package pkg\n\nimport \"strings\"\n\nfunc Emit(s string) string {\n\treturn strings.TrimSpace(strings.ToUpper(s))\n}\n\nfunc EmitAll(in []string) []string {\n\tout := make([]string, len(in))\n\tfor i, s := range in {\n\t\tout[i] = Emit(s)\n\t}\n\treturn out\n}\n",
-			}},
-	}
-}
-
-func run(dir, name string, env []string, args ...string) {
-	cmd := exec.Command(name, args...)
-	cmd.Dir = dir
-	cmd.Env = append(os.Environ(), env...)
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Printf("FAILED %s %v in %s: %v\n%s", name, args, dir, err, out)
-		os.Exit(1)
-	}
-}
-
-func buildDemo(root string) string {
-	dir, err := os.MkdirTemp(root, "gitwho-demo-")
-	if err != nil {
-		panic(err)
-	}
-	run(dir, "git", nil, "init", "-q")
-	run(dir, "git", nil, "config", "user.name", "demo")
-	run(dir, "git", nil, "config", "user.email", "demo@example.com")
-	for i, c := range seed() {
-		for p, content := range c.files {
-			full := filepath.Join(dir, p)
-			if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
-				panic(err)
-			}
-			if err := os.WriteFile(full, []byte(content), 0o644); err != nil {
-				panic(err)
-			}
-		}
-		env := []string{
-			"GIT_AUTHOR_NAME=" + c.who, "GIT_AUTHOR_EMAIL=" + c.email,
-			"GIT_COMMITTER_NAME=" + c.who, "GIT_COMMITTER_EMAIL=" + c.email,
-			"GIT_AUTHOR_DATE=" + c.date, "GIT_COMMITTER_DATE=" + c.date,
-		}
-		run(dir, "git", env, "add", "-A")
-		run(dir, "git", env, "commit", "-qm", fmt.Sprintf("commit %d by %s", i+1, c.who))
-	}
-	return dir
-}
 
 func xmlEscape(s string) string {
 	s = strings.ReplaceAll(s, "&", "&amp;")
@@ -147,15 +58,18 @@ func capture(bin, dir string, args ...string) string {
 }
 
 func main() {
+	if len(os.Args) < 2 {
+		fmt.Println("usage: go run screenshots/gen.go /path/to/repo")
+		os.Exit(2)
+	}
+	repo := os.Args[1]
 	root, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
-	// Allow running from repo root or screenshots/.
-	if _, err := os.Stat(filepath.Join(root, "screenshots", "gen.go")); err == nil {
-		// repo root already
-	} else if _, err := os.Stat("gen.go"); err == nil {
-		root = filepath.Dir(root)
+	if _, err := os.Stat(filepath.Join(root, "screenshots", "gen.go")); err != nil {
+		fmt.Println("run from the repo root")
+		os.Exit(2)
 	}
 	bin := filepath.Join(root, "git-who")
 	if _, err := os.Stat(bin); err != nil {
@@ -163,13 +77,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	tmpBase, err := os.MkdirTemp("", "gitwho-shots-")
-	if err != nil {
-		panic(err)
-	}
-	defer os.RemoveAll(tmpBase)
-
-	demo := buildDemo(tmpBase)
 	shots := filepath.Join(root, "screenshots")
 	jobs := []struct {
 		file  string
@@ -178,11 +85,11 @@ func main() {
 	}{
 		{"table.svg", "git-who table", []string{"table"}},
 		{"table-lines.svg", "git-who table -l", []string{"table", "-l"}},
-		{"tree.svg", "git-who tree", []string{"tree"}},
+		{"tree.svg", "git-who tree -d 2", []string{"tree", "-d", "2"}},
 		{"hist.svg", "git-who hist", []string{"hist"}},
 	}
 	for _, j := range jobs {
-		body := capture(bin, demo, j.args...)
+		body := capture(bin, repo, j.args...)
 		if err := os.WriteFile(filepath.Join(shots, j.file), []byte(svg(j.title, body)), 0o644); err != nil {
 			panic(err)
 		}
