@@ -8,10 +8,13 @@ export function renderHist(host: HTMLElement, data: HistResp) {
     const winPct = (b.value / max) * 100;
     const restPct = ((b.total - b.value) / max) * 100;
     const label = `${b.period}: ${b.author.name || '(no commits)'} ${b.value}/${b.total}`;
+    const who = b.author.name
+      ? `<span class="dot" style="background:${authorColor(b.author.name)}" aria-hidden="true"></span>${esc(b.author.name)} (${b.value}/${b.total})`
+      : `<span style="color:var(--muted)">no commits</span>`;
     return `<div class="hist-row" role="img" aria-label="${esc(label)}">
       <span>${esc(b.period)}</span>
       <span class="hist-bar" aria-hidden="true"><span class="win" style="width:${winPct}%"></span><span class="rest" style="width:${restPct}%"></span></span>
-      <span class="who"><span class="dot" style="background:${authorColor(b.author.name || '?')}" aria-hidden="true"></span>${esc(b.author.name || '-')} (${b.value}/${b.total})</span>
+      <span class="who">${who}</span>
     </div>`;
   }).join('');
   host.innerHTML = `

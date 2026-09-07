@@ -85,7 +85,7 @@ func main() {
 	}{
 		{"table.svg", "git-who table", []string{"table"}},
 		{"table-lines.svg", "git-who table -l", []string{"table", "-l"}},
-		{"tree.svg", "git-who tree -d 2", []string{"tree", "-d", "2"}},
+		{"tree.svg", "git-who tree -d 1", []string{"tree", "-d", "1"}},
 		{"hist.svg", "git-who hist", []string{"hist"}},
 	}
 	for _, j := range jobs {
