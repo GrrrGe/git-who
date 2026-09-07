@@ -71,6 +71,24 @@ git-who tree internal/  # top contributor per directory under internal/
 git-who hist            # timeline of top authors
 ```
 
+## Screenshots
+
+Real output. `screenshots/gen.go` rebuilds these from a demo repo.
+
+Rank authors. `-l` adds files and lines:
+
+![git-who table](screenshots/table.svg)
+
+![git-who table -l](screenshots/table-lines.svg)
+
+Top contributor per node (`-d` limits depth, `-a` annotates every file):
+
+![git-who tree](screenshots/tree.svg)
+
+Timeline (`-l` ranks periods by lines):
+
+![git-who hist](screenshots/hist.svg)
+
 ## Web UI
 
 `git-who serve` flags: `--port`, `--repo`. The UI is a single-page app

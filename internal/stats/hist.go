@@ -120,28 +120,14 @@ func Timeline(
 	merged := map[time.Time]map[string]*accumulator{}
 	var starts []time.Time
 	seen := map[time.Time]bool{}
-	// Dense series first so empty periods still appear.
-	for t := first; !t.After(last); t = t.AddDate(0, 0, 1) {
+	// Dense series from the first commit through the end date (usually now
+	// for active histories) so empty periods still appear.
+	for t := first; !t.After(end); t = t.AddDate(0, 0, 1) {
 		s, _ := width(t)
 		if !seen[s] {
 			seen[s] = true
 			starts = append(starts, s)
 		}
-	}
-	// Extend to the end date (e.g. "now" for active histories).
-	for {
-		s, _ := width(end)
-		found := false
-		for _, x := range starts {
-			if x.Equal(s) {
-				found = true
-			}
-		}
-		if found {
-			break
-		}
-		starts = append(starts, s)
-		break
 	}
 	sort.Slice(starts, func(i, j int) bool { return starts[i].Before(starts[j]) })
 

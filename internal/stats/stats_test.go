@@ -2,6 +2,8 @@ package stats
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -112,6 +114,43 @@ func TestBuildTreeEmpty(t *testing.T) {
 	_, err := BuildTree(ch, KeyFunc(false), false, nil, map[string]bool{}, "", Commits)
 	if !EmptyTree(err) {
 		t.Fatalf("expected empty-tree error, got %v", err)
+	}
+}
+
+func TestRebaseThroughSymlink(t *testing.T) {
+	real, err := os.MkdirTemp("", "real")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(real)
+	link := filepath.Join(os.TempDir(), "gitwho-link-test")
+	os.Remove(link)
+	if err := os.Symlink(real, link); err != nil {
+		t.Skip("symlinks unsupported")
+	}
+	defer os.Remove(link)
+
+	// The working dir may itself be reached via a symlink (macOS /tmp).
+	// Paths must still resolve instead of being dropped.
+	if got := rebase(real, link, "pkg/f.go"); got != "pkg/f.go" {
+		t.Fatalf("symlinked rebase dropped the path: %q", got)
+	}
+	if got := rebase(real, link, "../escape.go"); got != "" {
+		t.Fatalf("escaping path should be dropped: %q", got)
+	}
+}
+
+func TestTimelineExtendsToEnd(t *testing.T) {
+	c := commit("e1", "Ann", "ann@x.io", 1)
+	start := time.Date(2024, 1, 15, 12, 0, 0, 0, time.UTC)
+	c.Date = start
+	end := time.Date(2024, 4, 1, 12, 0, 0, 0, time.UTC)
+	buckets := Timeline(feed(c), KeyFunc(false), false, nil, end, Commits)
+	if len(buckets) != 4 {
+		t.Fatalf("want Jan..Apr buckets, got %d: %+v", len(buckets), buckets)
+	}
+	if buckets[3].Label != "Apr 2024" || buckets[3].WinnerValue(Commits) != 0 {
+		t.Fatalf("trailing bucket wrong: %+v", buckets[3])
 	}
 }
 

@@ -203,9 +203,17 @@ func BuildTree(
 
 // rebase converts a repo-rooted slash path to one relative to dir.
 // Paths escaping the working directory are dropped (empty return).
+// Symlinks are resolved first so symlinked checkouts (macOS /tmp, linked
+// workdirs) still match.
 func rebase(root, dir, p string) string {
 	if root == "" {
 		return p
+	}
+	if eval, err := filepath.EvalSymlinks(dir); err == nil {
+		dir = eval
+	}
+	if eval, err := filepath.EvalSymlinks(root); err == nil {
+		root = eval
 	}
 	abs := path.Join(root, p)
 	rel, err := filepath.Rel(dir, filepath.FromSlash(abs))
