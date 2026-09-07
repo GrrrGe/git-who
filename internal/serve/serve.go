@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/GrrrGe/git-who/internal/app"
-	"github.com/GrrrGe/git-who/internal/output"
 	"github.com/GrrrGe/git-who/internal/stats"
 )
 
@@ -243,6 +242,11 @@ func writeJSON(w http.ResponseWriter, v any) {
 	_ = enc.Encode(v)
 }
 
+func writeBytes(w http.ResponseWriter, data []byte) {
+	w.Header().Set("Content-Type", "application/json")
+	_, _ = w.Write(data)
+}
+
 func fail(w http.ResponseWriter, err error) {
 	slog.Warn("api error", "err", err)
 	w.Header().Set("Content-Type", "application/json")
@@ -253,52 +257,44 @@ func fail(w http.ResponseWriter, err error) {
 func handleTable(w http.ResponseWriter, r *http.Request) {
 	p := readParams(r)
 	out, err := inRepo(p.repo, func() (any, error) {
-		authors, _, err := app.Table(p.req)
-		if err != nil {
-			return nil, err
-		}
-		return output.BuildTableJSON(authors, p.req.Mode), nil
+		return app.TableJSON(p.req)
 	})
 	if err != nil {
 		fail(w, err)
 		return
 	}
-	writeJSON(w, out)
+	writeBytes(w, out.([]byte))
 }
 
 func handleTree(w http.ResponseWriter, r *http.Request) {
 	p := readParams(r)
 	out, err := inRepo(p.repo, func() (any, error) {
-		node, err := app.Tree(p.req)
+		data, err := app.TreeJSON(p.req)
 		if err != nil {
 			if stats.EmptyTree(err) {
-				return map[string]any{"mode": p.req.Mode.String(), "root": nil}, nil
+				return []byte(`{"mode":"` + p.req.Mode.String() + `","root":null}` + "\n"), nil
 			}
 			return nil, err
 		}
-		return output.BuildTreeJSON(node, p.req.Mode), nil
+		return data, nil
 	})
 	if err != nil {
 		fail(w, err)
 		return
 	}
-	writeJSON(w, out)
+	writeBytes(w, out.([]byte))
 }
 
 func handleHist(w http.ResponseWriter, r *http.Request) {
 	p := readParams(r)
 	out, err := inRepo(p.repo, func() (any, error) {
-		buckets, err := app.Hist(p.req)
-		if err != nil {
-			return nil, err
-		}
-		return output.BuildHistJSON(buckets, p.req.Mode), nil
+		return app.HistJSON(p.req)
 	})
 	if err != nil {
 		fail(w, err)
 		return
 	}
-	writeJSON(w, out)
+	writeBytes(w, out.([]byte))
 }
 
 func handleResolve(w http.ResponseWriter, r *http.Request) {

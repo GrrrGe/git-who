@@ -126,20 +126,26 @@ func tableCmd(args []string) error {
 	if err != nil {
 		return err
 	}
-	authors, cut, err := app.Table(app.Request{
+	req := app.Request{
 		Revs: revs, Paths: paths, Mode: mode, Limit: *limit,
 		ByEmail: *byEmail, Merges: *merges,
 		Since: f.since, Until: f.until, Authors: f.authors, NAuthors: f.nauthors,
-	})
+	}
+	if *js {
+		data, err := app.TableJSON(req)
+		if err != nil {
+			return err
+		}
+		_, err = os.Stdout.Write(data)
+		return err
+	}
+	authors, cut, err := app.Table(req)
 	if err != nil {
 		return err
 	}
-	switch {
-	case *js:
-		return output.WriteJSON(output.BuildTableJSON(authors, mode))
-	case *csv:
+	if *csv {
 		output.PrintCSV(os.Stdout, authors, mode)
-	default:
+	} else {
 		output.PrintTable(os.Stdout, authors, mode, *byEmail, cut)
 	}
 	return nil
@@ -181,19 +187,28 @@ func treeCmd(args []string) error {
 	if err != nil {
 		return err
 	}
-	node, err := app.Tree(app.Request{
+	req := app.Request{
 		Revs: revs, Paths: paths, Mode: mode,
 		ByEmail: *byEmail, Merges: *merges,
 		Since: f.since, Until: f.until, Authors: f.authors, NAuthors: f.nauthors,
-	})
+	}
+	if *js {
+		data, err := app.TreeJSON(req)
+		if err != nil {
+			if stats.EmptyTree(err) {
+				return nil
+			}
+			return err
+		}
+		_, err = os.Stdout.Write(data)
+		return err
+	}
+	node, err := app.Tree(req)
 	if err != nil {
 		if stats.EmptyTree(err) {
 			return nil
 		}
 		return err
-	}
-	if *js {
-		return output.WriteJSON(output.BuildTreeJSON(node, mode))
 	}
 	output.PrintTree(os.Stdout, node, mode, *depth, *all)
 	return nil
@@ -226,16 +241,22 @@ func histCmd(args []string) error {
 	if err != nil {
 		return err
 	}
-	buckets, err := app.Hist(app.Request{
+	req := app.Request{
 		Revs: revs, Paths: paths, Mode: mode,
 		ByEmail: *byEmail, Merges: *merges,
 		Since: f.since, Until: f.until, Authors: f.authors, NAuthors: f.nauthors,
-	})
-	if err != nil {
-		return err
 	}
 	if *js {
-		return output.WriteJSON(output.BuildHistJSON(buckets, mode))
+		data, err := app.HistJSON(req)
+		if err != nil {
+			return err
+		}
+		_, err = os.Stdout.Write(data)
+		return err
+	}
+	buckets, err := app.Hist(req)
+	if err != nil {
+		return err
 	}
 	output.PrintHist(os.Stdout, buckets, mode)
 	return nil

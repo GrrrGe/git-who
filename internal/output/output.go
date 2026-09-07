@@ -3,10 +3,8 @@
 package output
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 	"time"
 
@@ -435,11 +433,4 @@ func BuildHistJSON(buckets []*stats.Bucket, m stats.Mode) any {
 		})
 	}
 	return map[string]any{"mode": m.String(), "buckets": rows}
-}
-
-// WriteJSON encodes v indented to stdout.
-func WriteJSON(v any) error {
-	enc := json.NewEncoder(os.Stdout)
-	enc.SetIndent("", "  ")
-	return enc.Encode(v)
 }

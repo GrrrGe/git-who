@@ -10,13 +10,53 @@ import { renderHist } from './views/hist';
 import { renderTable } from './views/table';
 import { renderTree } from './views/tree';
 
+const INDEX_STEPS: Record<string, string[]> = {
+  table: ['Reading commit history', 'Ranking authors'],
+  tree: ['Reading commit history', 'Building file tree', 'Ranking nodes'],
+  hist: ['Reading commit history', 'Bucketing periods'],
+};
+
+const INDEX_TITLES: Record<string, string> = {
+  table: 'Indexing authors',
+  tree: 'Indexing file tree',
+  hist: 'Indexing history',
+};
+
+/** Indexing screen with animated progress. Returns a stop function. */
+function showIndexing(host: HTMLElement, view: string): () => void {
+  const repo = esc(state.repoName || state.repo);
+  host.innerHTML = `
+    <div class="indexing" role="status" aria-live="polite" data-aos="fade-up">
+      <h2 class="display-md">${INDEX_TITLES[view] ?? 'Indexing'}</h2>
+      <p class="legend">${repo}</p>
+      <div class="index-bar" aria-hidden="true"><span></span></div>
+      <p class="status body-sm" id="index-status">${INDEX_STEPS[view]?.[0] ?? 'Working'}…</p>
+      <div class="index-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>`;
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    return () => undefined;
+  }
+  const steps = INDEX_STEPS[view] ?? ['Working'];
+  let i = 0;
+  const el = host.querySelector('#index-status');
+  const timer = window.setInterval(() => {
+    i = (i + 1) % steps.length;
+    if (el) el.textContent = `${steps[i]}…`;
+  }, 900);
+  return () => window.clearInterval(timer);
+}
+
 async function renderView(host: HTMLElement) {
+  const stop = showIndexing(host, state.view);
   try {
     if (state.view === 'table') renderTable(host, await fetchTable(), render);
     else if (state.view === 'tree') renderTree(host, await fetchTree(), render);
     else renderHist(host, await fetchHist());
   } catch (e) {
     host.innerHTML = `<p class="error" role="alert">Error: ${esc((e as Error).message)}</p>`;
+  } finally {
+    stop();
   }
 }
 

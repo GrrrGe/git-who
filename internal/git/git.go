@@ -123,6 +123,17 @@ func isHash(s string) bool {
 	return true
 }
 
+// ResolveRev expands one revision (or range) to the object IDs git sees,
+// so cache keys track exactly what the analysis will read.
+func ResolveRev(ctx context.Context, rev string) (string, error) {
+	cmd := exec.CommandContext(ctx, "git", "rev-parse", rev)
+	out, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+	return string(out), nil
+}
+
 // Root returns the repository top level for the current directory.
 func Root() (string, error) {
 	ctx, cancel := context.WithCancel(context.Background())

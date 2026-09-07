@@ -170,8 +170,12 @@ Timestamps are RFC 3339.
   removal plus one addition.
 - **Merges**: skipped by default. `--merges` counts them toward commit totals.
 - Respects `.mailmap` and `.git-blame-ignore-revs`.
-- Remote links clone once under `XDG_CACHE_HOME/git-who/remote` and refresh
-  with `git fetch` per visit.
+- Remote links clone once under `XDG_CACHE_HOME/git-who/remote`
+  and refresh with `git fetch` per visit.
+- Computed results cache under `XDG_CACHE_HOME/git-who/results`, keyed by
+  resolved revisions plus flags. New commits miss automatically. Repeat views
+  return instantly. Delete the folder to clear it. Plain-text CLI output
+  always recomputes; `--json` and the web UI share the cache.
 
 ## Development
 
