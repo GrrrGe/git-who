@@ -1,4 +1,4 @@
-# GitWho — Agent Handover
+# GitWho: Agent Handover
 
 Project: **GitWho** (`github.com/GrrrGe/git-who`). Authorship analysis for git
 repos: `git blame` for file trees. Single Go binary: CLI
@@ -90,15 +90,15 @@ link), `rev` (repeatable, default `HEAD`), `path` (repeatable), `mode`
 5. **Cold VLC costs ~60s** (850 MB history). Capture scripts need long
    timeouts (`shot.mjs` tree wait is 240s). First run warms disk + result
    cache; repeats are sub-second.
-6. **Table search re-renders tbody only** — full re-render kills input focus
+6. **Table search re-renders tbody only**: full re-render kills input focus
    mid keystroke. Suggestions are a custom dropdown (native `datalist`
    positions itself unpredictably), prefix matches ranked first.
 7. **Reduced motion** respected in anim.ts and CSS. Keep it that way.
 8. AOS (CDN in `web/index.html`) animates landing/guide only, never data
-   views (re-renders retriggered it — looked unpolished). `refreshAnims()`
+   views (re-renders retriggered it, looked unpolished). `refreshAnims()`
    runs after shell renders.
 9. Empty hist buckets render muted "no commits", no author dot.
-10. `go install ...@latest` prints `unknown unknown` version (no ldflags) —
+10. `go install ...@latest` prints `unknown unknown` version (no ldflags):
     normal, not a bug.
 
 ## Current state
