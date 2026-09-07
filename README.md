@@ -71,35 +71,63 @@ git-who tree internal/  # top contributor per directory under internal/
 git-who hist            # timeline of top authors
 ```
 
-## Screenshots
+## CLI examples
 
-Rank authors by commits:
+Real output from the VLC repository.
 
-![git-who table](screenshots/table.svg)
+### Authors by commits
 
-Rank authors by lines changed:
+```bash
+git-who table
+```
 
-![git-who table -l](screenshots/table-lines.svg)
+<img src="screenshots/table.png" width="412" alt="Authors by commits in VLC, with aligned terminal output">
 
-Compare contributors across directories:
+### Authors by lines changed
 
-![git-who tree](screenshots/tree.svg)
+```bash
+git-who table -l
+```
 
-See who contributed in each period:
+<img src="screenshots/table-lines.png" width="656" alt="Authors by lines changed in VLC, with aligned terminal output">
 
-![git-who hist](screenshots/hist.svg)
+### Contributors by directory
+
+```bash
+git-who tree -d 2 bin/
+```
+
+<img src="screenshots/tree.png" width="506" alt="Contributors by directory in VLC, with aligned terminal output">
+
+### Contributors over time
+
+Recent periods; the image shows an excerpt of the output.
+
+```bash
+git-who hist --since 2010-01-01
+```
+
+<img src="screenshots/hist.png" width="625" alt="Contributors over time in VLC, with aligned terminal output">
 
 ## Web UI screenshots
 
-Same repo in the browser (`web/shot.mjs` captures these):
+The same VLC checkout in the browser.
 
-![landing](screenshots/web-landing.png)
+### Start page
 
-![table view](screenshots/web-table.png)
+![GitWho start page](screenshots/web-landing.png)
 
-![tree view](screenshots/web-tree.png)
+### Authors
 
-![history view](screenshots/web-hist.png)
+![VLC authors ranked by commits](screenshots/web-table.png)
+
+### File tree
+
+![Expandable VLC directories with aligned contributor and commit columns](screenshots/web-tree.png)
+
+### History
+
+![VLC contribution history](screenshots/web-hist.png)
 
 ## Web UI
 
@@ -220,6 +248,10 @@ Web UI (`web/`, Vite + vanilla TypeScript, build time only):
 ```bash
 cd web && npm install && npm run build   # emits internal/serve/dist/
 ```
+
+After editing the UI, rebuild the web bundle first, then run `make install`
+and restart `git-who serve`. A running server keeps the UI embedded in its
+original executable.
 
 `internal/serve/dist/` is committed, so `make build` always yields a working
 `git-who serve`. The bundle embeds via `go:embed`.

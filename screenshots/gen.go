@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 )
 
@@ -16,7 +17,7 @@ func xmlEscape(s string) string {
 	s = strings.ReplaceAll(s, "&", "&amp;")
 	s = strings.ReplaceAll(s, "<", "&lt;")
 	s = strings.ReplaceAll(s, ">", "&gt;")
-	return s
+	return strings.ReplaceAll(s, " ", "&#160;")
 }
 
 func svg(title, body string) string {
@@ -59,7 +60,7 @@ func capture(bin, dir string, args ...string) string {
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("usage: go run screenshots/gen.go /path/to/repo")
+		fmt.Println("usage: go run screenshots/gen.go /path/to/repo [table table-lines tree hist]")
 		os.Exit(2)
 	}
 	repo := os.Args[1]
@@ -85,11 +86,20 @@ func main() {
 	}{
 		{"table.svg", "git-who table", []string{"table"}},
 		{"table-lines.svg", "git-who table -l", []string{"table", "-l"}},
-		{"tree.svg", "git-who tree -d 1", []string{"tree", "-d", "1"}},
-		{"hist.svg", "git-who hist", []string{"hist"}},
+		{"tree.svg", "git-who tree -d 2 bin/", []string{"tree", "-d", "2", "bin/"}},
+		{"hist.svg", "git-who hist --since 2010-01-01", []string{"hist", "--since", "2010-01-01"}},
 	}
 	for _, j := range jobs {
+		if len(os.Args) > 2 && !slices.Contains(os.Args[2:], strings.TrimSuffix(j.file, ".svg")) {
+			continue
+		}
 		body := capture(bin, repo, j.args...)
+		if j.file == "hist.svg" {
+			lines := strings.Split(strings.TrimRight(body, "\n"), "\n")
+			if len(lines) > 19 {
+				body = strings.Join(lines[:19], "\n") + "\n..."
+			}
+		}
 		if err := os.WriteFile(filepath.Join(shots, j.file), []byte(svg(j.title, body)), 0o644); err != nil {
 			panic(err)
 		}

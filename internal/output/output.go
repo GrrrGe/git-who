@@ -92,48 +92,63 @@ func PrintTable(out io.Writer, authors []*stats.Author, m stats.Mode, byEmail bo
 	now := time.Now()
 	wide := m == stats.Lines || m == stats.Files
 
-	nameWidth := 30
-	for _, a := range authors {
-		if n := len([]rune(displayName(a, byEmail))) + 2; n > nameWidth && n <= 44 {
-			nameWidth = n
-		}
-	}
-
-	rule := strings.Repeat("─", nameWidth+34)
-	if wide {
-		rule = strings.Repeat("─", nameWidth+58)
-	}
-	fmt.Fprintf(out, "┌%s┐\n", rule)
-
 	when := "Last edit"
-	useFirst := m == stats.FirstEdit
-	if useFirst {
+	if m == stats.FirstEdit {
 		when = "First edit"
 	}
+	headers := []string{"Author", when, "Commits"}
 	if wide {
-		fmt.Fprintf(out, "│%-*s %-11s %7s %7s  %17s│\n", nameWidth, "Author", when, "Commits", "Files", "Lines (+/-)")
-	} else {
-		fmt.Fprintf(out, "│%-*s %-11s %7s│\n", nameWidth, "Author", when, "Commits")
+		headers = append(headers, "Files", "Lines (+/-)")
 	}
-	fmt.Fprintf(out, "├%s┤\n", rule)
-
+	rows := [][]string{headers}
 	for _, a := range authors {
 		t := a.Last
-		if useFirst {
+		if m == stats.FirstEdit {
 			t = a.First
 		}
+		row := []string{displayName(a, byEmail), ago(now, t), commas(a.Commits)}
 		if wide {
-			lines := fmt.Sprintf("+%-6s / -%-6s", commas(a.Added), commas(a.Removed))
-			fmt.Fprintf(out, "│%-*s %-11s %7s %7s  %17s│\n",
-				nameWidth, displayName(a, byEmail), ago(now, t),
-				commas(a.Commits), commas(a.Files), lines)
-		} else {
-			fmt.Fprintf(out, "│%-*s %-11s %7s│\n",
-				nameWidth, displayName(a, byEmail), ago(now, t), commas(a.Commits))
+			row = append(row, commas(a.Files), fmt.Sprintf("+%s / -%s", commas(a.Added), commas(a.Removed)))
+		}
+		rows = append(rows, row)
+	}
+
+	widths := make([]int, len(headers))
+	for _, row := range rows {
+		for i, cell := range row {
+			if n := len([]rune(cell)); n > widths[i] {
+				widths[i] = n
+			}
+		}
+	}
+	innerWidth := 2 + 2*(len(widths)-1)
+	for _, width := range widths {
+		innerWidth += width
+	}
+	more := fmt.Sprintf("...%s more...", commas(cut))
+	if cut > 0 && len([]rune(more))+2 > innerWidth {
+		widths[0] += len([]rune(more)) + 2 - innerWidth
+		innerWidth = len([]rune(more)) + 2
+	}
+	rule := strings.Repeat("─", innerWidth)
+	fmt.Fprintf(out, "┌%s┐\n", rule)
+	for index, row := range rows {
+		cells := make([]string, len(row))
+		for i, cell := range row {
+			padding := strings.Repeat(" ", widths[i]-len([]rune(cell)))
+			if i >= 2 {
+				cells[i] = padding + cell
+			} else {
+				cells[i] = cell + padding
+			}
+		}
+		fmt.Fprintf(out, "│ %s │\n", strings.Join(cells, "  "))
+		if index == 0 {
+			fmt.Fprintf(out, "├%s┤\n", rule)
 		}
 	}
 	if cut > 0 {
-		fmt.Fprintf(out, "│%-*s│\n", len([]rune(rule)), fmt.Sprintf("...%s more...", commas(cut)))
+		fmt.Fprintf(out, "│ %s │\n", padRight(more, innerWidth-2))
 	}
 	fmt.Fprintf(out, "└%s┘\n", rule)
 }
@@ -242,9 +257,9 @@ func flattenTree(
 	}
 	for i, k := range kids {
 		child := n.Children[k]
-		branch, ext := "├── ", "│   "
+		branch := "├── "
 		if i == lastVisible {
-			branch, ext = "└── ", "    "
+			branch = "└── "
 		}
 		var childPrefix string
 		if depth == 0 {
@@ -256,6 +271,10 @@ func flattenTree(
 				base = base[:len(base)-4]
 			} else {
 				base = nil
+			}
+			ext := "│   "
+			if strings.HasSuffix(prefix, "└── ") {
+				ext = "    "
 			}
 			childPrefix = string(base) + ext + branch
 		}

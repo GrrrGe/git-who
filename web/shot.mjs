@@ -3,7 +3,7 @@
 import { chromium } from 'playwright-core';
 
 const REPO = process.argv[2];
-const BASE = 'http://127.0.0.1:18083';
+const BASE = process.env.GITWHO_SHOT_URL || 'http://127.0.0.1:18083';
 const OUT = new URL('../screenshots/', import.meta.url).pathname;
 
 if (!REPO) {

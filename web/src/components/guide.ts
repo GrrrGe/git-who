@@ -11,7 +11,7 @@ export function guideHTML(): string {
     <h1 class="display-lg">What can GitWho do?</h1>
     <p class="body-lg" style="color:var(--muted)">Three views over your git history, plus the CLI behind them.</p>
 
-    <section class="grid grid-3" data-aos="fade-up">
+    <section class="grid grid-3">
       <div class="card">
         <p class="headline">Table</p>
         <p class="body-sm" style="color:var(--muted)">Sortable ledger of every author.</p>
@@ -26,7 +26,7 @@ export function guideHTML(): string {
       </div>
     </section>
 
-    <section data-aos="fade-up">
+    <section>
       <h2 class="display-md">Prefer the terminal?</h2>
       <p class="body" style="color:var(--muted)">Same analysis, no browser:</p>
       <pre class="code"><span class="c"># Install the CLI (Go, or from source)</span>

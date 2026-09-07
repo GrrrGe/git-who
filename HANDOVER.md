@@ -17,7 +17,8 @@ internal/output/         text renderers + JSON shape builders
 internal/serve/          HTTP APIs + go:embed web UI (dist/ IS committed)
 internal/cache/          disk JSON result cache (XDG_CACHE_HOME/git-who/results)
 web/src/                 SPA: api, state, anim, components/, views/
-web/shot.mjs             Playwright screenshots via installed Chrome (dev only)
+web/shot.mjs             Web screenshots via installed Chrome (dev only)
+web/terminal-shots.mjs   Converts terminal SVG captures to README PNGs
 screenshots/gen.go        Terminal SVGs from real CLI output (`go run`, //go:build ignore)
 Makefile                 build / install / test / vet
 Dockerfile               minimal multi-stage image
@@ -33,6 +34,7 @@ cd web && npm install && npm run build   # emits internal/serve/dist/
 ./git-who serve --port 8080              # UI + APIs on 127.0.0.1 only
 node web/shot.mjs /path/to/repo          # needs serve on :18083
 go run screenshots/gen.go /path/to/repo  # needs ./git-who built
+node web/terminal-shots.mjs              # SVGs to README PNGs
 ```
 
 Tests: 17 funcs (`internal/{git,stats,serve}`). No frameworks. Ruby/rake are
@@ -71,8 +73,8 @@ link), `rev` (repeatable, default `HEAD`), `path` (repeatable), `mode`
   and must keep a copyright line.
 - `internal/serve/dist/` is committed (embed requires it at build time).
   Rebuild web before Go after any UI change.
-- Terminal SVGs preserve whitespace (`xml:space` plus `white-space:pre`)
-  so columns and tree indentation survive browser rendering.
+- Terminal SVGs encode spaces as `&#160;` to preserve column alignment.
+  README uses PNGs rendered at 2x with explicit display widths.
 - Screenshots must come from **real repos** (VLC cache used last), never
   fictional data. Terminal SVGs via `gen.go`; web PNGs via `shot.mjs`.
 - `web/node_modules/` ignored. `git-who` binary ignored. Keep history to
@@ -95,10 +97,9 @@ link), `rev` (repeatable, default `HEAD`), `path` (repeatable), `mode`
 6. **Table search re-renders tbody only**: full re-render kills input focus
    mid keystroke. Suggestions are a custom dropdown (native `datalist`
    positions itself unpredictably), prefix matches ranked first.
-7. **Reduced motion** respected in anim.ts and CSS. Keep it that way.
-8. AOS (CDN in `web/index.html`) animates landing/guide only, never data
-   views (re-renders retriggered it, looked unpolished). `refreshAnims()`
-   runs after shell renders.
+7. **Reduced motion** respected in CSS. Keep it that way.
+8. No external animation libraries or typewriter. The wordmark renders
+   fully styled immediately. Loading appears only after 180 ms.
 9. Empty hist buckets render muted "no commits", no author dot.
 10. `go install ...@latest` prints `unknown unknown` version (no ldflags):
     normal, not a bug.
@@ -116,3 +117,6 @@ link), `rev` (repeatable, default `HEAD`), `path` (repeatable), `mode`
 Lazy-load tree children on expand (VLC nested DOM is heavy); parallel log
 sharding over rev ranges; cache plain-text CLI output too; optional
 shallow-clone preview flag for giant GitHub links.
+
+After rebuilding, replace the installed executable and restart any running
+server. An existing process continues serving its old embedded UI.

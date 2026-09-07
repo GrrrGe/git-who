@@ -2,34 +2,24 @@ import { esc, state } from '../state';
 
 const WORDMARK = `<span class="t-git">Git</span><span class="t-who">Who</span><a id="brand-q" class="t-q" href="#" aria-label="Open the guide: what can GitWho do?">?</a>`;
 
-function paintWordmark(root: HTMLElement, onGuide: () => void) {
-  const h1 = root.querySelector<HTMLElement>('#wordmark');
-  if (!h1) return;
-  h1.innerHTML = WORDMARK;
-  h1.querySelector('#brand-q')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    onGuide();
-  });
-}
-
 export function landingHTML(): string {
   const busy = state.analyzing;
   const err = state.analyzeError
     ? `<p class="error" role="alert">${esc(state.analyzeError)}</p>` : '';
   return `
   <div class="landing">
-    <h1 id="wordmark" class="display-xxl brand-title" aria-label="GitWho?"></h1>
-    <p class="subhead sub" data-aos="fade-up" data-aos-delay="150">Who wrote this code?!</p>
-    <form id="landing-form" class="landing-form" data-aos="fade-up" data-aos-delay="250">
+    <h1 id="wordmark" class="display-xxl brand-title" aria-label="GitWho?">${WORDMARK}</h1>
+    <p class="subhead sub">Who wrote this code?!</p>
+    <form id="landing-form" class="landing-form">
       <div class="input-group level-2">
         <input id="landing-input" type="text" value="${esc(state.landingInput)}"
           placeholder="Paste a GitHub link or local path…"
           aria-label="GitHub link or local repo path" ${busy ? 'disabled' : ''} />
-        <button class="btn btn-primary" type="submit" ${busy ? 'disabled' : ''}>${busy ? 'Cloning…' : 'Analyze'}</button>
+        <button class="btn btn-primary" type="submit" ${busy ? 'disabled' : ''}>${busy ? 'Opening…' : 'Analyze'}</button>
       </div>
     </form>
     ${err}
-    <button id="howto" class="howto-link" data-aos="fade-up" data-aos-delay="350">How to use GitWho →</button>
+    <button id="howto" class="howto-link">How to use GitWho →</button>
   </div>`;
 }
 
@@ -38,7 +28,10 @@ export function bindLanding(
   onAnalyze: (input: string) => void,
   onGuide: () => void,
 ) {
-  paintWordmark(root, onGuide);
+  root.querySelector('#brand-q')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    onGuide();
+  });
 
   const form = root.querySelector<HTMLFormElement>('#landing-form');
   const input = root.querySelector<HTMLInputElement>('#landing-input');

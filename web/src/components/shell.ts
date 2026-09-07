@@ -10,8 +10,8 @@ export function shellHTML(): string {
     `<button class="tab" data-view="${v}" aria-pressed="${state.view === v}">${label}</button>`;
   return `
   <div class="topbar">
-    <button class="brand btn-translucent brand-title" id="brand-home" aria-label="Back to home" style="border:none;cursor:pointer;font-size:22px"><span class="t-git">Git</span><span class="t-who">Who</span></button>
-    <button id="brand-q" class="t-q btn-translucent" aria-label="Open the guide" style="border:none;cursor:pointer;font-size:22px;font-family:var(--font-display)">?</button>
+    <div class="nav-wordmark"><button class="brand btn-translucent brand-title" id="brand-home" aria-label="Back to home" style="border:none;cursor:pointer;font-size:22px"><span class="t-git">Git</span><span class="t-who">Who</span></button>
+    <button id="brand-q" class="t-q btn-translucent" aria-label="Open the guide" style="border:none;cursor:pointer;font-size:22px;font-family:var(--font-display)">?</button></div>
     <span class="body-sm" style="color:var(--muted)" title="${esc(state.repo)}">${esc(state.repoName || state.repo)}</span>
     <span class="spacer"></span>
     <span class="popover-wrap">${filtersButtonHTML()}${filtersPanelHTML()}</span>
@@ -29,6 +29,6 @@ export function shellHTML(): string {
       ${modeButton('first_modified', 'First edit', '-c')}
       </div>
     </div>
-    <div id="view" role="region" aria-label="Repository results"><p class="legend">Loading…</p></div>
+    <div id="view" role="region" aria-label="Repository results"></div>
   </div>`;
 }
