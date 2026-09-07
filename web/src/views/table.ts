@@ -66,19 +66,16 @@ export function renderTable(host: HTMLElement, data: TableResp, rerender: () => 
     return `<th><button data-sort="${k}" aria-label="Sort by ${label}">${label}${arrow}</button></th>`;
   }).join('');
 
-  const options = data.authors
-    .map((a) => `<option value="${esc(a.name)}">${esc(a.email)}</option>`)
-    .join('');
-
   host.innerHTML = `
     ${spotlight}
     <div class="toolbar">
-      <label class="field">Filter authors
-        <input id="tf" class="input" type="search" list="author-suggest"
+      <div class="field suggest-wrap">Filter authors
+        <input id="tf" class="input" type="search"
           value="${esc(state.tableFilter)}" placeholder="name or email"
+          role="combobox" aria-expanded="false" aria-controls="suggest"
           aria-label="Filter authors" autocomplete="off" />
-      </label>
-      <datalist id="author-suggest">${options}</datalist>
+        <div id="suggest" class="suggest" role="listbox" aria-label="Author suggestions" hidden></div>
+      </div>
     </div>
     <div class="card" style="padding:0;overflow:auto">
     <table class="data" aria-label="Contributions by author">
@@ -96,11 +93,96 @@ export function renderTable(host: HTMLElement, data: TableResp, rerender: () => 
   });
 
   // Filter in place: only the rows update, so the input keeps focus while
-  // typing and the browser can offer datalist suggestions.
+  // typing. Suggestions render in a Google-style dropdown under the input.
   const tf = host.querySelector<HTMLInputElement>('#tf');
   const tbody = host.querySelector('#author-rows');
+  const suggest = host.querySelector('#suggest');
+  let activeIdx = -1;
+
+  const matches = (): TableAuthor[] => {
+    const f = state.tableFilter.toLowerCase().trim();
+    const pool = !f
+      ? data.authors
+      : data.authors.filter((a) =>
+        a.name.toLowerCase().includes(f) || a.email.toLowerCase().includes(f));
+    return pool.slice(0, 8);
+  };
+
+  const highlight = (name: string): string => {
+    const f = state.tableFilter.trim();
+    if (!f) return esc(name);
+    const i = name.toLowerCase().indexOf(f.toLowerCase());
+    if (i < 0) return esc(name);
+    return esc(name.slice(0, i)) + '<b class="hl">' +
+      esc(name.slice(i, i + f.length)) + '</b>' + esc(name.slice(i + f.length));
+  };
+
+  const paintSuggest = () => {
+    if (!suggest || !tf) return;
+    const list = matches();
+    if (!list.length) {
+      suggest.innerHTML = '<div class="suggest-empty">No matching authors.</div>';
+    } else {
+      suggest.innerHTML = list.map((a, i) => `
+        <button class="suggest-item${i === activeIdx ? ' active' : ''}" role="option"
+          aria-selected="${i === activeIdx}" data-i="${i}">
+          <span class="dot" style="background:${authorColor(a.name)}" aria-hidden="true"></span>
+          <span>${highlight(a.name)}</span>
+          <small style="color:var(--muted)">${esc(a.email)}</small>
+        </button>`).join('');
+      suggest.querySelectorAll<HTMLButtonElement>('.suggest-item').forEach((b) => {
+        // mousedown beats input blur so the pick lands before close.
+        b.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          pick(list[Number(b.dataset.i)]);
+        });
+      });
+    }
+    suggest.hidden = false;
+    tf.setAttribute('aria-expanded', 'true');
+  };
+
+  const closeSuggest = () => {
+    if (!suggest || !tf) return;
+    suggest.hidden = true;
+    tf.setAttribute('aria-expanded', 'false');
+    activeIdx = -1;
+  };
+
+  const pick = (a: TableAuthor) => {
+    state.tableFilter = a.name;
+    if (tf) tf.value = a.name;
+    if (tbody) tbody.innerHTML = rowsHTML(visibleRows(data));
+    closeSuggest();
+  };
+
   tf?.addEventListener('input', () => {
     state.tableFilter = tf.value;
+    activeIdx = -1;
     if (tbody) tbody.innerHTML = rowsHTML(visibleRows(data));
+    paintSuggest();
   });
+  tf?.addEventListener('focus', () => {
+    activeIdx = -1;
+    paintSuggest();
+  });
+  tf?.addEventListener('keydown', (e) => {
+    if (suggest?.hidden) return;
+    const list = matches();
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeIdx = Math.min(activeIdx + 1, list.length - 1);
+      paintSuggest();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIdx = Math.max(activeIdx - 1, -1);
+      paintSuggest();
+    } else if (e.key === 'Enter' && activeIdx >= 0 && list[activeIdx]) {
+      e.preventDefault();
+      pick(list[activeIdx]);
+    } else if (e.key === 'Escape') {
+      closeSuggest();
+    }
+  });
+  tf?.addEventListener('blur', () => closeSuggest());
 }

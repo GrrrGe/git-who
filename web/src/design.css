@@ -352,6 +352,26 @@ table.data th, table.data td { text-align: left; padding: 10px var(--xs); border
 table.data tbody tr:nth-child(even) { background: color-mix(in srgb, var(--card) 60%, transparent); }
 table.data th button { border: none; background: none; padding: 0; font-weight: 700; color: var(--fg); cursor: pointer; min-height: 0; }
 
+/* Search suggestions (Google-style, pinned under the input) */
+.suggest-wrap { position: relative; }
+.suggest {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 40;
+  background: var(--card-featured);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+.suggest-item {
+  display: flex; gap: 8px; align-items: baseline;
+  width: 100%; text-align: left;
+  background: none; border: none; color: var(--fg);
+  padding: 10px 12px; cursor: pointer; min-height: 40px; font-size: 14px;
+}
+.suggest-item:hover, .suggest-item.active { background: var(--surface-2); }
+.suggest-item .hl { color: var(--blue); }
+.suggest-empty { padding: 10px 12px; color: var(--muted); font-size: 13px; }
+
 /* File browser */
 .crumb {
   border: none; background: none; cursor: pointer;
