@@ -71,6 +71,8 @@ link), `rev` (repeatable, default `HEAD`), `path` (repeatable), `mode`
   and must keep a copyright line.
 - `internal/serve/dist/` is committed (embed requires it at build time).
   Rebuild web before Go after any UI change.
+- Terminal SVGs preserve whitespace (`xml:space` plus `white-space:pre`)
+  so columns and tree indentation survive browser rendering.
 - Screenshots must come from **real repos** (VLC cache used last), never
   fictional data. Terminal SVGs via `gen.go`; web PNGs via `shot.mjs`.
 - `web/node_modules/` ignored. `git-who` binary ignored. Keep history to
@@ -103,8 +105,8 @@ link), `rev` (repeatable, default `HEAD`), `path` (repeatable), `mode`
 
 ## Current state
 
-- `master` on `GrrrGe/git-who`, owner-only history. Latest: newest-first
-  history everywhere + nested web tree.
+- `master` on `GrrrGe/git-who`, owner-only history. Current UI: aligned file tree columns, native folder toggles, retained
+  expansion state, and compact controls. Folders start collapsed.
 - Local server typically on `:8080` (`/tmp/gitwho-serve.log`); shot server
   on `:18083`. Both bind localhost only.
 - Result cache and remote clones live under `~/.cache/git-who/`.

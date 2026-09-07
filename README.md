@@ -59,7 +59,7 @@ git-who serve --repo /path/to/your/repo
 
 Without `--repo`, the landing page accepts a GitHub link
 (`owner/repo` or full URL, cloned to cache on demand) or a local path.
-The glowing **?** opens the built-in guide.
+The **?** opens the built-in guide.
 
 CLI:
 
@@ -73,11 +73,19 @@ git-who hist            # timeline of top authors
 
 ## Screenshots
 
+Rank authors by commits:
+
 ![git-who table](screenshots/table.svg)
+
+Rank authors by lines changed:
 
 ![git-who table -l](screenshots/table-lines.svg)
 
+Compare contributors across directories:
+
 ![git-who tree](screenshots/tree.svg)
+
+See who contributed in each period:
 
 ![git-who hist](screenshots/hist.svg)
 
@@ -101,7 +109,7 @@ embedded in the binary.
 - **Landing**: search box. GitHub link or local path, then Analyze.
 - **Table**: sortable, filterable ledger. Commits, files, lines (+/-),
   first/last edit.
-- **Tree**: browser with breadcrumbs. Top contributor and metric per row.
+- **Tree**: expandable directories with aligned contributor and metric columns.
 - **History**: bar chart per period. Winner and period totals.
 - **Filters button**: revision, path, author include/exclude, calendar date
   range, email, merges, hidden files. Badge shows active count.

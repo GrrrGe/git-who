@@ -1,9 +1,4 @@
-import { typewriter } from '../anim';
 import { esc, state } from '../state';
-
-// Clean Google-style landing: wordmark + search only.
-// The headline types itself in pure JS, then swaps to the styled wordmark
-// (blue "Git", glowing "?" link to the Guide). Use cases live on the Guide.
 
 const WORDMARK = `<span class="t-git">Git</span><span class="t-who">Who</span><a id="brand-q" class="t-q" href="#" aria-label="Open the guide: what can GitWho do?">?</a>`;
 
@@ -43,12 +38,7 @@ export function bindLanding(
   onAnalyze: (input: string) => void,
   onGuide: () => void,
 ) {
-  const h1 = root.querySelector<HTMLElement>('#wordmark');
-  if (h1 && !state.analyzing) {
-    typewriter(h1, 'GitWho?', 110, () => paintWordmark(root, onGuide));
-  } else if (h1) {
-    paintWordmark(root, onGuide);
-  }
+  paintWordmark(root, onGuide);
 
   const form = root.querySelector<HTMLFormElement>('#landing-form');
   const input = root.querySelector<HTMLInputElement>('#landing-input');

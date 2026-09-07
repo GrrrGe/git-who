@@ -96,7 +96,7 @@ export function renderTable(host: HTMLElement, data: TableResp, rerender: () => 
   // typing. Suggestions render in a Google-style dropdown under the input.
   const tf = host.querySelector<HTMLInputElement>('#tf');
   const tbody = host.querySelector('#author-rows');
-  const suggest = host.querySelector('#suggest');
+  const suggest = host.querySelector<HTMLElement>('#suggest');
   let activeIdx = -1;
 
   const matches = (): TableAuthor[] => {

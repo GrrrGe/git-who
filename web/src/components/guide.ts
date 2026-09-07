@@ -1,6 +1,6 @@
 import { state } from '../state';
 
-// Use-cases showcase + CLI reference. Reached via the glowing "?" and the
+// View descriptions and CLI reference. Reached via the "?" and the
 // "How to use" link; back returns to wherever you came from.
 
 export function guideHTML(): string {
@@ -10,22 +10,6 @@ export function guideHTML(): string {
     <p class="caption" style="color:var(--muted);margin:32px 0 8px">Guide</p>
     <h1 class="display-lg">What can GitWho do?</h1>
     <p class="body-lg" style="color:var(--muted)">Three views over your git history, plus the CLI behind them.</p>
-
-    <section data-aos="fade-up">
-      <div class="spotlight">
-        <p class="caption">Table</p>
-        <h3>Every author, ranked</h3>
-        <p class="body">Commits, files, lines (+/-) per author. Sortable and filterable.</p>
-      </div>
-    </section>
-
-    <section data-aos="fade-up">
-      <div class="spotlight spotlight-orange">
-        <p class="caption">Tree &amp; History</p>
-        <h3>Own every directory</h3>
-        <p class="body">Top contributor per node, color-coded. Bar-chart timeline included.</p>
-      </div>
-    </section>
 
     <section class="grid grid-3" data-aos="fade-up">
       <div class="card">

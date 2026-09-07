@@ -15,17 +15,20 @@ export function shellHTML(): string {
     <span class="body-sm" style="color:var(--muted)" title="${esc(state.repo)}">${esc(state.repoName || state.repo)}</span>
     <span class="spacer"></span>
     <span class="popover-wrap">${filtersButtonHTML()}${filtersPanelHTML()}</span>
-    <button id="new-repo" class="btn btn-secondary">New</button>
+    <button id="new-repo" class="btn btn-secondary">Change repo</button>
     <button id="theme" class="btn-icon" aria-label="Toggle theme">◐</button>
   </div>
   <div class="wrap">
-    <div class="toolbar" role="tablist" aria-label="Views">
+    <div class="toolbar view-navigation">
+      <div class="tabs" role="group" aria-label="Views">
       ${viewBtn('table', 'Table')} ${viewBtn('tree', 'Tree')} ${viewBtn('hist', 'History')}
-      <span class="spacer"></span>
+      </div>
+      <div class="tabs mode-tabs" role="group" aria-label="Rank by">
       ${modeButton('commits', 'Commits', 'default')} ${modeButton('lines', 'Lines', '-l')}
       ${modeButton('files', 'Files', '-f')} ${modeButton('last_modified', 'Last edit', '-m')}
       ${modeButton('first_modified', 'First edit', '-c')}
+      </div>
     </div>
-    <div id="view" role="tabpanel"><p class="legend">Loading…</p></div>
+    <div id="view" role="region" aria-label="Repository results"><p class="legend">Loading…</p></div>
   </div>`;
 }

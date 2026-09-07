@@ -103,7 +103,10 @@ export function render() {
   });
   app.querySelector('#theme')?.addEventListener('click', () => {
     const root = document.documentElement;
-    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    const dark = root.getAttribute('data-theme')
+      ? root.getAttribute('data-theme') === 'dark'
+      : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const next = dark ? 'light' : 'dark';
     root.setAttribute('data-theme', next);
     localStorage.setItem('git-who-theme', next);
   });

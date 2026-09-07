@@ -28,12 +28,12 @@ func svg(title, body string) string {
 		}
 	}
 	const fs = 13.0
-	charW, lineH, pad, header := 7.9, 19.0, 18.0, 34.0
+	charW, lineH, pad, header := 7.9, 21.0, 28.0, 38.0
 	w := float64(cols)*charW + pad*2
 	h := float64(len(lines))*lineH + pad*2 + header
 
 	var b strings.Builder
-	fmt.Fprintf(&b, `<svg xmlns="http://www.w3.org/2000/svg" width="%.0f" height="%.0f" viewBox="0 0 %.0f %.0f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="%.0f">`, w, h, w, h, fs)
+	fmt.Fprintf(&b, `<svg xmlns="http://www.w3.org/2000/svg" width="%.0f" height="%.0f" viewBox="0 0 %.0f %.0f" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="%.0f" xml:space="preserve" style="white-space:pre">`, w, h, w, h, fs)
 	fmt.Fprintf(&b, `<rect width="100%%" height="100%%" rx="10" fill="#090909" stroke="#262626"/>`)
 	fmt.Fprintf(&b, `<circle cx="28" cy="22" r="5" fill="#ff5f57"/><circle cx="46" cy="22" r="5" fill="#febc2e"/><circle cx="64" cy="22" r="5" fill="#28c840"/>`)
 	fmt.Fprintf(&b, `<text x="84" y="27" fill="#999999">%s</text>`, xmlEscape(title))
@@ -54,7 +54,7 @@ func capture(bin, dir string, args ...string) string {
 		fmt.Printf("FAILED git-who %v: %v\n%s", args, err, out)
 		os.Exit(1)
 	}
-	return "$ git-who " + strings.Join(args, " ") + "\n" + string(out)
+	return "$ git-who " + strings.Join(args, " ") + "\n\n" + string(out)
 }
 
 func main() {
