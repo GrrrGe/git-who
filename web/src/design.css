@@ -410,6 +410,11 @@ table.data th button { border: none; background: none; padding: 0; font-weight: 
   .index-bar span, .index-dots span { animation: none; }
 }
 
+/* Nested tree */
+.tree-kids { margin-left: 10px; border-left: 1px solid var(--border-soft); padding-left: 14px; }
+.tree-dir > summary { cursor: pointer; border-radius: var(--r-xs); }
+.tree-dir > summary:hover { background: var(--surface-1); }
+
 /* File browser */
 .crumb {
   border: none; background: none; cursor: pointer;

@@ -31,7 +31,8 @@ await page.screenshot({ path: OUT + 'web-table.png' });
 console.log('wrote web-table.png');
 
 await page.click('button[data-view="tree"]');
-await page.waitForSelector('table.data tbody tr');
+await page.waitForSelector('.tree-row', { timeout: 240000 });
+await page.waitForTimeout(1500);
 await page.screenshot({ path: OUT + 'web-tree.png' });
 console.log('wrote web-tree.png');
 

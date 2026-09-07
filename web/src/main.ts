@@ -144,7 +144,6 @@ async function analyze(input: string) {
     const r = await resolveRepo(input);
     state.repo = r.repo;
     state.repoName = r.name;
-    state.treePath = '';
     state.collapsed.clear();
     state.analyzing = false;
     const url = new URL(location.href);

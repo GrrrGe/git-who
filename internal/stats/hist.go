@@ -148,7 +148,8 @@ func Timeline(
 	}
 
 	out := make([]*Bucket, 0, len(starts))
-	for _, s := range starts {
+	for i := len(starts) - 1; i >= 0; i-- {
+		s := starts[i]
 		_, label := width(s)
 		slot := merged[s]
 		authors := make([]*Author, 0, len(slot))

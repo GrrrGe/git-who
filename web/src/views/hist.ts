@@ -2,8 +2,8 @@ import type { HistResp } from '../api';
 import { authorColor, esc } from '../state';
 
 export function renderHist(host: HTMLElement, data: HistResp) {
-  // Newest period first; scroll down for the earliest.
-  const buckets = [...data.buckets].reverse();
+  // API serves newest period first; scroll down for the earliest.
+  const buckets = data.buckets;
   const max = Math.max(1, ...buckets.map((b) => b.total));
   const leader = data.buckets.reduce((acc, b) => (b.value > (acc?.value ?? -1) ? b : acc), data.buckets[0]);
   const rows = buckets.map((b) => {

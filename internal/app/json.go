@@ -34,7 +34,7 @@ func fingerprint(root string, view string, r Request) (string, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	parts := []string{"v1", view, root}
+	parts := []string{"v2", view, root}
 	for _, rev := range r.Revs {
 		resolved, err := git.ResolveRev(ctx, rev)
 		if err != nil {

@@ -20,7 +20,6 @@ export const state = {
   tableSortDir: -1 as number,
   tableFilter: '',
   collapsed: new Set<string>(),
-  treePath: '' as string,
   filtersOpen: false,
   screen: 'landing' as Screen,
   guideFrom: 'landing' as 'landing' | 'app',

@@ -147,10 +147,13 @@ func TestTimelineExtendsToEnd(t *testing.T) {
 	end := time.Date(2024, 4, 1, 12, 0, 0, 0, time.UTC)
 	buckets := Timeline(feed(c), KeyFunc(false), false, nil, end, Commits)
 	if len(buckets) != 4 {
-		t.Fatalf("want Jan..Apr buckets, got %d: %+v", len(buckets), buckets)
+		t.Fatalf("want Apr..Jan buckets, got %d: %+v", len(buckets), buckets)
 	}
-	if buckets[3].Label != "Apr 2024" || buckets[3].WinnerValue(Commits) != 0 {
-		t.Fatalf("trailing bucket wrong: %+v", buckets[3])
+	if buckets[0].Label != "Apr 2024" || buckets[0].WinnerValue(Commits) != 0 {
+		t.Fatalf("newest bucket wrong: %+v", buckets[0])
+	}
+	if buckets[3].Label != "Jan 2024" || buckets[3].WinnerValue(Commits) != 1 {
+		t.Fatalf("oldest bucket wrong: %+v", buckets[3])
 	}
 }
 
@@ -175,7 +178,11 @@ func TestTimelineBuckets(t *testing.T) {
 			t.Fatalf("expected monthly label like %q, got %q", "Feb 2024", b.Label)
 		}
 	}
-	if buckets[0].Winner == nil || buckets[0].Winner.Name != "Ann" {
-		t.Fatalf("first bucket winner should be Ann: %+v", buckets[0].Winner)
+	if buckets[0].Winner == nil || buckets[0].Winner.Name != "Bob" {
+		t.Fatalf("newest bucket winner should be Bob: %+v", buckets[0].Winner)
+	}
+	last := buckets[len(buckets)-1]
+	if last.Winner == nil || last.Winner.Name != "Ann" {
+		t.Fatalf("oldest bucket winner should be Ann: %+v", last.Winner)
 	}
 }
