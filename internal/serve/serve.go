@@ -97,9 +97,11 @@ func isRemote(s string) bool {
 }
 
 // normalizeRemote turns shorthands ("owner/repo", "github.com/o/r") into
-// cloneable https URLs; full URLs pass through untouched.
+// cloneable https URLs; full URLs pass through untouched. A trailing .git
+// is always stripped so every spelling of one repo shares a cache dir.
 func normalizeRemote(s string) string {
 	s = strings.TrimSpace(strings.TrimSuffix(s, "/"))
+	s = strings.TrimSuffix(s, ".git")
 	if schemeRe.MatchString(s) || scpRe.MatchString(s) {
 		return s
 	}

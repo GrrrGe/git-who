@@ -250,7 +250,10 @@ per ~512 commits): 1: 57s, 2: 36s, 4: 24s, 8: 19s, 10: 17s. Shards merge by
 set union, so parallel output is byte-identical to single-process
 (verified by diffing 19 command variants across modes and formats). The log parser sustains
 185 MB/s at ~11 allocations per commit. The server logs per-request
-milliseconds plus cache hit/miss for every API call.
+milliseconds plus cache hit/miss for every API call. The web UI rides the
+same pipeline: cold VLC views compute in ~17s behind the Indexing screen,
+repeats serve warm under 1s. Remote URL spellings share one cache dir
+(trailing `.git` stripped).
 
 ## Development
 

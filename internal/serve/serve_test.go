@@ -45,8 +45,8 @@ func TestNormalizeRemote(t *testing.T) {
 		t.Fatalf("domain prefix: %q", got)
 	}
 	full := "https://github.com/GrrrGe/git-who.git"
-	if got := normalizeRemote(full); got != full {
-		t.Fatalf("full URL changed: %q", got)
+	if got := normalizeRemote(full); got != "https://github.com/GrrrGe/git-who" {
+		t.Fatalf(".git suffix not stripped: %q", got)
 	}
 }
 
