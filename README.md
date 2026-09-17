@@ -237,23 +237,31 @@ Timestamps are RFC 3339.
 
 ## Performance
 
-Measured with `make bench` and `scripts/bench.sh` (7 runs, p99 covers the
-cold run). Corpus: VLC, 850 MB history, 10 cores.
+Harness: `make bench`, `scripts/bench.sh`, `scripts/metrics.py` (100 warm
+samples per view, p99 includes a cold run). Corpus: VLC, 850 MB history,
+10 cores. All numbers reproducible.
 
-| Workload            | p50   | p99    |
-| ------------------- | ----- | ------ |
-| `tree --json` warm  | 0.05s | 0.05s  |
-| `tree --json` cold  | n/a   | 17.7s  |
+| Workload (VLC)            | p50    | p99    | Notes                          |
+| ------------------------- | ------ | ------ | ------------------------------ |
+| API table, warm           | 23ms   | 26ms   | cache hit                      |
+| API tree, warm            | 34ms   | 42ms   | 16 MB JSON payload             |
+| API hist, warm            | 27ms   | 33ms   | cache hit                      |
+| `tree --json`, cold       | n/a    | 17.7s  | 10 workers; 57s single-process |
+| `table --json`, cold      | 0.8s   | n/a    | commits mode skips diffs       |
+| Throughput, warm table    | 53rps  | n/a    | 8 concurrent readers, 0 errors |
+| Error budget              | 0 fail | 265 req| mixed views + throughput run   |
 
-Cold scaling by worker (`GITWHO_WORKERS`, default is CPU count, one shard
-per ~512 commits): 1: 57s, 2: 36s, 4: 24s, 8: 19s, 10: 17s. Shards merge by
-set union, so parallel output is byte-identical to single-process
-(verified by diffing 19 command variants across modes and formats). The log parser sustains
-185 MB/s at ~11 allocations per commit. The server logs per-request
-milliseconds plus cache hit/miss for every API call. The web UI rides the
-same pipeline: cold VLC views compute in ~17s behind the Indexing screen,
-repeats serve warm under 1s. Remote URL spellings share one cache dir
-(trailing `.git` stripped).
+Cold scaling by worker (`GITWHO_WORKERS`, one shard per ~512 commits):
+1: 57s, 2: 36s, 4: 24s, 8: 19s, 10: 17s at ~3.9x CPU utilization. Shards
+merge by set union, so parallel output is byte-identical to single-process
+(verified by diffing 19 command variants across modes and formats).
+
+Memory (max RSS, cold VLC): tree 386 MB (per-author per-path sets dominate),
+table 75 MB. Parser: 185 MB/s at ~11 allocations per commit. Unit coverage:
+stats 80%, output 46%, git 30%, serve 15%. Binary 7 MB, zero dependencies.
+Web bundle 27 KB JS (8.5 KB gzip). The server logs per-request milliseconds
+plus cache hit/miss for every API call. Remote URL spellings share one
+cache dir (trailing `.git` stripped).
 
 ## Development
 
