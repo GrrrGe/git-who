@@ -54,7 +54,7 @@ func Table(r Request) ([]*stats.Author, int, error) {
 		return nil, 0, err
 	}
 
-	stream, wait, err := git.Stream(ctx, r.Revs, r.Paths, r.filters(), r.Mode.NeedsDiffs(), git.HasMailmap(root))
+	stream, wait, err := git.StreamSharded(ctx, r.Revs, r.Paths, r.filters(), r.Mode.NeedsDiffs(), git.HasMailmap(root))
 	if err != nil {
 		return nil, 0, err
 	}
@@ -80,7 +80,7 @@ func Tree(r Request) (*stats.Node, error) {
 		return nil, err
 	}
 
-	stream, wait, err := git.Stream(ctx, r.Revs, r.Paths, r.filters(), true, git.HasMailmap(root))
+	stream, wait, err := git.StreamSharded(ctx, r.Revs, r.Paths, r.filters(), true, git.HasMailmap(root))
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ func Hist(r Request) ([]*stats.Bucket, error) {
 		end = time.Now()
 	}
 
-	stream, wait, err := git.Stream(ctx, r.Revs, r.Paths, r.filters(), r.Mode.NeedsDiffs(), git.HasMailmap(root))
+	stream, wait, err := git.StreamSharded(ctx, r.Revs, r.Paths, r.filters(), r.Mode.NeedsDiffs(), git.HasMailmap(root))
 	if err != nil {
 		return nil, err
 	}

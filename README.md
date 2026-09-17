@@ -235,6 +235,23 @@ Timestamps are RFC 3339.
   return instantly. Delete the folder to clear it. Plain-text CLI output
   always recomputes; `--json` and the web UI share the cache.
 
+## Performance
+
+Measured with `make bench` and `scripts/bench.sh` (7 runs, p99 covers the
+cold run). Corpus: VLC, 850 MB history, 10 cores.
+
+| Workload            | p50   | p99    |
+| ------------------- | ----- | ------ |
+| `tree --json` warm  | 0.05s | 0.05s  |
+| `tree --json` cold  | n/a   | 17.7s  |
+
+Cold scaling by worker (`GITWHO_WORKERS`, default is CPU count, one shard
+per ~512 commits): 1: 57s, 2: 36s, 4: 24s, 8: 19s, 10: 17s. Shards merge by
+set union, so parallel output is byte-identical to single-process
+(verified by diffing 19 command variants across modes and formats). The log parser sustains
+185 MB/s at ~11 allocations per commit. The server logs per-request
+milliseconds plus cache hit/miss for every API call.
+
 ## Development
 
 ```bash

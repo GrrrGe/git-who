@@ -189,72 +189,6 @@ func IgnoreRevs(root string) []string {
 	return revs
 }
 
-// Stream opens a git log pipe and yields commits as they are parsed.
-// Call wait when the stream is exhausted to release the subprocess.
-func Stream(
-	ctx context.Context,
-	revs, pathspecs []string,
-	f Filters,
-	wantDiffs bool,
-	useMailmap bool,
-) (<-chan Commit, func() error, error) {
-	format := "--pretty=format:%H%x00%h%x00%p%x00%an%x00%ae%x00%at%x00"
-	if useMailmap {
-		format = "--pretty=format:%H%x00%h%x00%p%x00%aN%x00%aE%x00%at%x00"
-	}
-
-	args := []string{
-		"-c", "core.quotePath=false",
-		"log", format, "-z",
-		"--date=unix", "--reverse", "--no-show-signature",
-	}
-	if useMailmap {
-		args = append(args, "--mailmap")
-	} else {
-		args = append(args, "--no-mailmap")
-	}
-	if wantDiffs {
-		args = append(args, "--numstat")
-	}
-	args = append(args, f.ToArgs()...)
-	args = append(args, revs...)
-	if len(pathspecs) > 0 {
-		args = append(args, "--")
-		args = append(args, pathspecs...)
-	}
-
-	cmd := exec.CommandContext(ctx, "git", args...)
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		return nil, nil, fmt.Errorf("could not open git output: %w", err)
-	}
-	stderr, err := cmd.StderrPipe()
-	if err != nil {
-		return nil, nil, fmt.Errorf("could not open git errors: %w", err)
-	}
-	if err := cmd.Start(); err != nil {
-		return nil, nil, fmt.Errorf("could not start git log: %w", err)
-	}
-
-	out := make(chan Commit, 64)
-	parser := newParser(stdout, out)
-	go parser.run()
-
-	wait := func() error {
-		parserErr := parser.wait()
-		errText, _ := io.ReadAll(stderr)
-		if err := cmd.Wait(); err != nil {
-			msg := strings.TrimSpace(string(errText))
-			if msg != "" {
-				return fmt.Errorf("git log failed: %s", msg)
-			}
-			return fmt.Errorf("git log failed: %w", err)
-		}
-		return parserErr
-	}
-	return out, wait, nil
-}
-
 // parser turns git's NUL-delimited log stream into commits.
 //
 // Layout per commit: six NUL-terminated header fields
@@ -266,15 +200,20 @@ type parser struct {
 	r    *bufio.Reader
 	out  chan<- Commit
 	done chan error
+	// closeOnDone releases the output channel when parsing ends. Sharded
+	// workers share one channel, so only the fan-in closer sets this.
+	closeOnDone bool
 }
 
 func newParser(r io.Reader, out chan<- Commit) *parser {
-	return &parser{r: bufio.NewReader(r), out: out, done: make(chan error, 1)}
+	return &parser{r: bufio.NewReader(r), out: out, done: make(chan error, 1), closeOnDone: true}
 }
 
 func (p *parser) run() {
 	p.done <- p.parse()
-	close(p.out)
+	if p.closeOnDone {
+		close(p.out)
+	}
 }
 
 func (p *parser) wait() error {

@@ -67,35 +67,41 @@ func encode(v any) ([]byte, error) {
 }
 
 // cached runs fresh, encodes, and stores the result under the request key.
-// Cache misses, errors, and encode failures all fall back to fresh compute.
-func cached(root, view string, r Request, fresh func() (any, error)) ([]byte, error) {
+// The hit flag tells callers whether the answer came from disk, which the
+// server logs for latency reporting. Misses and errors fall back to fresh
+// compute.
+func cached(root, view string, r Request, fresh func() (any, error)) ([]byte, bool, error) {
 	if key, err := fingerprint(root, view, r); err == nil {
 		if data, ok := cache.Get(key); ok {
-			return data, nil
+			return data, true, nil
 		}
 		v, err := fresh()
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 		data, err := encode(v)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 		_ = cache.Set(key, data)
-		return data, nil
+		return data, false, nil
 	}
 	v, err := fresh()
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
-	return encode(v)
+	data, err := encode(v)
+	if err != nil {
+		return nil, false, err
+	}
+	return data, false, nil
 }
 
 // TableJSON returns the table payload, cached when the repo state matches.
-func TableJSON(r Request) ([]byte, error) {
+func TableJSON(r Request) ([]byte, bool, error) {
 	root, err := git.Root()
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	return cached(root, "table", r, func() (any, error) {
 		authors, _, err := Table(r)
@@ -107,10 +113,10 @@ func TableJSON(r Request) ([]byte, error) {
 }
 
 // TreeJSON returns the tree payload, cached when the repo state matches.
-func TreeJSON(r Request) ([]byte, error) {
+func TreeJSON(r Request) ([]byte, bool, error) {
 	root, err := git.Root()
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	return cached(root, "tree", r, func() (any, error) {
 		node, err := Tree(r)
@@ -122,10 +128,10 @@ func TreeJSON(r Request) ([]byte, error) {
 }
 
 // HistJSON returns the timeline payload, cached when the repo state matches.
-func HistJSON(r Request) ([]byte, error) {
+func HistJSON(r Request) ([]byte, bool, error) {
 	root, err := git.Root()
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	return cached(root, "hist", r, func() (any, error) {
 		buckets, err := Hist(r)

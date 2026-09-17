@@ -254,10 +254,26 @@ func fail(w http.ResponseWriter, err error) {
 	_ = json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
 }
 
+func timed(view, repo string, fn func() ([]byte, bool, error)) ([]byte, error) {
+	start := time.Now()
+	data, hit, err := fn()
+	slog.Info("api", "view", view, "ms", time.Since(start).Milliseconds(), "cached", hit, "repo", repoName(repo))
+	return data, err
+}
+
+func repoName(repo string) string {
+	if i := strings.LastIndex(repo, "/"); i >= 0 {
+		return repo[i+1:]
+	}
+	return repo
+}
+
 func handleTable(w http.ResponseWriter, r *http.Request) {
 	p := readParams(r)
 	out, err := inRepo(p.repo, func() (any, error) {
-		return app.TableJSON(p.req)
+		return timed("table", p.repo, func() ([]byte, bool, error) {
+			return app.TableJSON(p.req)
+		})
 	})
 	if err != nil {
 		fail(w, err)
@@ -269,14 +285,16 @@ func handleTable(w http.ResponseWriter, r *http.Request) {
 func handleTree(w http.ResponseWriter, r *http.Request) {
 	p := readParams(r)
 	out, err := inRepo(p.repo, func() (any, error) {
-		data, err := app.TreeJSON(p.req)
-		if err != nil {
-			if stats.EmptyTree(err) {
-				return []byte(`{"mode":"` + p.req.Mode.String() + `","root":null}` + "\n"), nil
+		return timed("tree", p.repo, func() ([]byte, bool, error) {
+			data, hit, err := app.TreeJSON(p.req)
+			if err != nil {
+				if stats.EmptyTree(err) {
+					return []byte(`{"mode":"` + p.req.Mode.String() + `","root":null}` + "\n"), false, nil
+				}
+				return nil, false, err
 			}
-			return nil, err
-		}
-		return data, nil
+			return data, hit, nil
+		})
 	})
 	if err != nil {
 		fail(w, err)
@@ -288,7 +306,9 @@ func handleTree(w http.ResponseWriter, r *http.Request) {
 func handleHist(w http.ResponseWriter, r *http.Request) {
 	p := readParams(r)
 	out, err := inRepo(p.repo, func() (any, error) {
-		return app.HistJSON(p.req)
+		return timed("hist", p.repo, func() ([]byte, bool, error) {
+			return app.HistJSON(p.req)
+		})
 	})
 	if err != nil {
 		fail(w, err)

@@ -132,7 +132,7 @@ func tableCmd(args []string) error {
 		Since: f.since, Until: f.until, Authors: f.authors, NAuthors: f.nauthors,
 	}
 	if *js {
-		data, err := app.TableJSON(req)
+		data, _, err := app.TableJSON(req)
 		if err != nil {
 			return err
 		}
@@ -193,7 +193,7 @@ func treeCmd(args []string) error {
 		Since: f.since, Until: f.until, Authors: f.authors, NAuthors: f.nauthors,
 	}
 	if *js {
-		data, err := app.TreeJSON(req)
+		data, _, err := app.TreeJSON(req)
 		if err != nil {
 			if stats.EmptyTree(err) {
 				return nil
@@ -247,7 +247,7 @@ func histCmd(args []string) error {
 		Since: f.since, Until: f.until, Authors: f.authors, NAuthors: f.nauthors,
 	}
 	if *js {
-		data, err := app.HistJSON(req)
+		data, _, err := app.HistJSON(req)
 		if err != nil {
 			return err
 		}

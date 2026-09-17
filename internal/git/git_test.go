@@ -1,10 +1,36 @@
 package git
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 	"time"
 )
+
+func BenchmarkParse(b *testing.B) {
+	var sb strings.Builder
+	for i := 0; i < 2000; i++ {
+		fmt.Fprintf(&sb, "hash%036d\x00sh\x00\x00Author\x00a@x.io\x001700000000\x00\n3\t1\tfile%d.go\x00", i, i)
+	}
+	raw := sb.String()
+	b.SetBytes(int64(len(raw)))
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		out := make(chan Commit, 64)
+		p := newParser(strings.NewReader(raw), out)
+		go p.run()
+		n := 0
+		for range out {
+			n++
+		}
+		if err := p.wait(); err != nil {
+			b.Fatal(err)
+		}
+		if n != 2000 {
+			b.Fatalf("got %d commits", n)
+		}
+	}
+}
 
 func feed(t *testing.T, raw string) []Commit {
 	t.Helper()
