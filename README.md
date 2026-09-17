@@ -259,7 +259,7 @@ merge by set union, so parallel output is byte-identical to single-process
 Memory (max RSS, cold VLC): tree 386 MB (per-author per-path sets dominate),
 table 75 MB. Parser: 185 MB/s at ~11 allocations per commit. Unit coverage:
 stats 80%, output 46%, git 30%, serve 15%. Binary 7 MB, zero dependencies.
-Web bundle 27 KB JS (8.5 KB gzip). The server logs per-request milliseconds
+Web bundle 25 KB JS (8.3 KB gzip). The server logs per-request milliseconds
 plus cache hit/miss for every API call. Remote URL spellings share one
 cache dir (trailing `.git` stripped).
 
